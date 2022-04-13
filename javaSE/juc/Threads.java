@@ -30,6 +30,12 @@ public class Threads {
         });
     }
 
+    public static ForkJoinTask<Integer> getForkJoinTask() {
+        AtomicInteger ato = new AtomicInteger(100);
+        ForkJoinPool forkJoinPool = new ForkJoinPool();
+        return forkJoinPool.submit(new MyForkJoinTask<>(new FunctionC(), ato.get()));
+    }
+
     interface IFunction<T, R> {
         R apply(T t) throws Exception;
     }
@@ -49,18 +55,10 @@ public class Threads {
         }
     }
 
-    public static ForkJoinTask<Integer> getForkJoinTask() {
-        AtomicInteger ato = new AtomicInteger(100);
-        ForkJoinPool forkJoinPool = new ForkJoinPool();
-        return forkJoinPool.submit(new MyForkJoinTask<>(new FunctionC(), ato.get()));
-    }
-
     static class MyForkJoinTask<T, R> extends ForkJoinTask<R> {
-
         private final IFunction<T, R> fun;
         private final T value;
         private R res;
-
         public MyForkJoinTask(IFunction<T, R> fun, T value) {
             if (null == fun || null == value) {
                 throw new NullPointerException("fun or value can not be null");
@@ -68,19 +66,14 @@ public class Threads {
             this.fun = fun;
             this.value = value;
         }
-
-
         @Override
         public R getRawResult() {
             return res;
         }
-
-
         @Override
         protected void setRawResult(R value) {
             this.res = value;
         }
-
         @Override
         protected boolean exec() {
             try {
@@ -92,7 +85,6 @@ public class Threads {
             return getRawResult() != null;
         }
     }
-
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         System.out.println(getForkJoinTask().get());
     }
