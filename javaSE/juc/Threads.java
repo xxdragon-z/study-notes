@@ -2,8 +2,7 @@ package juc;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.function.Supplier;
+
 
 /**
  * Created by XXDragon on 2022/4/13 14:56
@@ -59,6 +58,7 @@ public class Threads {
         private final IFunction<T, R> fun;
         private final T value;
         private R res;
+
         public MyForkJoinTask(IFunction<T, R> fun, T value) {
             if (null == fun || null == value) {
                 throw new NullPointerException("fun or value can not be null");
@@ -66,14 +66,17 @@ public class Threads {
             this.fun = fun;
             this.value = value;
         }
+
         @Override
         public R getRawResult() {
             return res;
         }
+
         @Override
         protected void setRawResult(R value) {
             this.res = value;
         }
+
         @Override
         protected boolean exec() {
             try {
@@ -85,7 +88,20 @@ public class Threads {
             return getRawResult() != null;
         }
     }
+
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        System.out.println(getForkJoinTask().get());
+//        System.out.println(getForkJoinTask().get());
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(4, 100, 4,
+                TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(10));
+        for (int i = 0; i < 1000; i++) {
+            System.out.println(i);
+            executor.execute(new Thread(() -> {
+                try {
+                    TimeUnit.SECONDS.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }));
+        }
     }
 }
